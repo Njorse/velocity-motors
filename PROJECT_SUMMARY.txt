@@ -1,0 +1,325 @@
+================================================================================
+PROYECTO: VELOCITY MOTORS — CONCESIONARIA WEB SPA CON IA Y AUTOMATIZACIÓN
+TIPO: Full-Stack Web Application (SPA + API Backend + IA + Automatización)
+UBICACIÓN: c:\Users\sourc\OneDrive\Escritorio\concesionaria Paginaweb
+FECHA DE ÚLTIMA ACTUALIZACIÓN: 28 de Abril del 2026
+================================================================================
+
+DESCRIPCIÓN GENERAL
+-------------------
+Velocity Motors es una plataforma web profesional para una concesionaria 
+automotriz premium del mercado peruano. Combina una Landing Page de alto 
+impacto visual (diseño "Brutalist Automotive" dark-mode) con un Asistente 
+Virtual inteligente capaz de mantener conversaciones naturales, capturar 
+leads de clientes interesados y disparar automatizaciones en tiempo real.
+
+El sistema está compuesto por 4 capas principales:
+  1. Landing Page pública (React/Vite)
+  2. Agente conversacional con IA (Groq + Llama 3.3)
+  3. Base de datos y autenticación (Supabase)
+  4. Automatización externa (Make.com vía Webhooks)
+
+================================================================================
+ARQUITECTURA DEL SISTEMA (DETALLADA)
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                        USUARIO (Navegador)                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐   │
+│  │ Landing Page  │  │  ChatWidget   │  │  Panel Admin (/admin)  │   │
+│  │ (React/Vite)  │  │ (Voz + Texto) │  │ (Login + Dashboard)    │   │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬─────────────┘   │
+└─────────┼─────────────────┼─────────────────────┼─────────────────┘
+          │                 │ POST /chat-voz      │ GET /api/leads
+          │                 │                     │ (JWT Bearer)
+┌─────────▼─────────────────▼─────────────────────▼─────────────────┐
+│                    BACKEND (FastAPI - Python)                       │
+│                    Puerto: 8000 (Uvicorn)                          │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  Endpoints:                                                  │   │
+│  │  • POST /chat-voz      → Público (chat del asistente)       │   │
+│  │  • DELETE /sesion/{id}  → Público (limpiar sesión)          │   │
+│  │  • GET /api/leads       → PROTEGIDO (requiere JWT válido)   │   │
+│  └─────────┬───────────────────────────┬───────────────────────┘   │
+│            │                           │                           │
+│     ┌──────▼──────┐            ┌───────▼───────┐                   │
+│     │  GROQ API   │            │   SUPABASE    │                   │
+│     │ Llama 3.3   │            │  • Auth (JWT) │                   │
+│     │ 70B Versátil │            │  • DB (leads) │                   │
+│     │             │            │               │                   │
+│     │ Tool Calling│            └───────────────┘                   │
+│     │ • guardar_  │                                                │
+│     │   lead      │───────────────┐                                │
+│     │ • finalizar │               │                                │
+│     │   conversac.│               │                                │
+│     └─────────────┘               │                                │
+│                            ┌──────▼──────┐                         │
+│                            │  MAKE.COM   │                         │
+│                            │  (Webhook)  │                         │
+│                            │  POST JSON  │                         │
+│                            └──────┬──────┘                         │
+└───────────────────────────────────┼────────────────────────────────┘
+                                    │
+                    ┌───────────────▼───────────────┐
+                    │   AUTOMATIZACIONES EXTERNAS    │
+                    │  • Envío de Email (Gmail)      │
+                    │  • Notificación WhatsApp       │
+                    │  • Registro en Google Sheets   │
+                    │  • Cualquier acción en Make    │
+                    └───────────────────────────────┘
+
+================================================================================
+ESTRUCTURA DE ARCHIVOS DEL PROYECTO
+================================================================================
+
+concesionaria Paginaweb/
+├── PROJECT_SUMMARY.txt              ← Este archivo (documentación)
+│
+├── backend/                          ← SERVIDOR API (Python)
+│   ├── main.py                      ← Lógica principal: endpoints, IA, tools
+│   ├── requirements.txt             ← Dependencias Python
+│   ├── .env                         ← Variables secretas (GROQ, SUPABASE)
+│   └── venv/                        ← Entorno virtual Python
+│
+└── velocity-react/                   ← CLIENTE WEB (React + Vite)
+    ├── index.html                   ← Punto de entrada HTML
+    ├── package.json                 ← Dependencias JS
+    ├── .env                         ← Variables Supabase (VITE_SUPABASE_*)
+    ├── src/
+    │   ├── App.jsx                  ← Router principal (/, /login, /admin)
+    │   ├── main.jsx                 ← Punto de entrada React
+    │   ├── config/
+    │   │   └── supabase.js          ← Cliente Supabase para el Frontend
+    │   └── components/
+    │       ├── Navbar.jsx           ← Barra de navegación
+    │       ├── HeroSection.jsx      ← Sección principal con carrusel
+    │       ├── BrandDNA.jsx         ← ADN de marcas disponibles
+    │       ├── Showroom.jsx         ← Catálogo de vehículos con filtros
+    │       ├── FinanceCalculator.jsx← Calculadora de financiamiento
+    │       ├── Footer.jsx           ← Pie de página con contacto
+    │       ├── ChatWidget.jsx       ← Widget de chat con voz (SpeechAPI)
+    │       └── admin/
+    │           ├── Login.jsx        ← Pantalla de login (Supabase Auth)
+    │           ├── ProtectedRoute.jsx← Guardia de ruta (verifica JWT)
+    │           └── Dashboard.jsx    ← Panel de leads + KPIs + Export Excel
+    └── dist/                        ← Build de producción (opcional)
+
+================================================================================
+COMPONENTES TÉCNICOS (DETALLE)
+================================================================================
+
+1. FRONTEND — LANDING PAGE (React + Vite + Tailwind)
+   ─────────────────────────────────────────────────
+   • Diseño: "Brutalist Automotive", fondo zinc-950, acentos en rojo (#dc2626).
+   • Tipografía: Montserrat (títulos), Inter (cuerpo).
+   • Componentes: Navbar, HeroSection (carrusel), BrandDNA, Showroom 
+     (catálogo con filtros por marca), FinanceCalculator, Footer.
+   • ChatWidget: Widget flotante con reconocimiento de voz nativo del 
+     navegador (Web Speech API) y síntesis de voz (Text-to-Speech).
+   • Responsive: Diseño adaptable a móvil, tablet y escritorio.
+
+2. FRONTEND — PANEL DE ADMINISTRACIÓN (/admin)
+   ─────────────────────────────────────────────
+   • Login.jsx: Formulario con Glassmorphism, usa signInWithPassword().
+     SIN registro público. Solo admin creado manualmente en Supabase.
+   • ProtectedRoute.jsx: Wrapper que verifica getSession() de Supabase.
+     Si no hay sesión activa, redirige a /login.
+   • Dashboard.jsx: Tabla de leads con KPIs (Total / Hoy), botón 
+     "Exportar a Excel" usando librería xlsx.
+   • Seguridad: Cada fetch al backend lleva header Authorization: Bearer.
+
+3. BACKEND — API (FastAPI + Python)
+   ─────────────────────────────────
+   • main.py: Archivo único con toda la lógica del servidor.
+   • Endpoints:
+     - POST /chat-voz: Recibe texto del usuario, envía al LLM con 
+       historial de sesión y System Prompt, devuelve respuesta.
+     - DELETE /sesion/{id}: Limpia el historial de una sesión.
+     - GET /api/leads: PROTEGIDO con HTTPBearer. Valida JWT contra 
+       Supabase (auth.get_user). Devuelve lista de leads ordenada.
+   • Sesiones: Diccionario en memoria (sessions: dict[str, list]).
+   • Variables de entorno: GROQ_API_KEY, SUPABASE_URL, SUPABASE_KEY.
+
+4. INTELIGENCIA ARTIFICIAL (Groq API + Llama 3.3 70B)
+   ────────────────────────────────────────────────────
+   • Modelo: llama-3.3-70b-versatile (procesado en la nube de Groq).
+   • System Prompt: Personalidad de asesor de ventas premium, con reglas
+     anti-jailbreak, memoria de conversación y flujo de conversación guiado:
+     Modelo → Fecha → Nombre → WhatsApp (en ese orden, paso a paso).
+   • Contexto de Inventario: Catálogo real con marcas, modelos y precios
+     inyectado directamente en el prompt para cotizaciones precisas.
+   • Tool Calling (Function Calling):
+     - guardar_lead_test_drive(nombre, whatsapp, modelo_auto, fecha_test_drive):
+       Se dispara cuando la IA recolecta los 4 datos.
+       Guarda en Supabase + envía a Make.com.
+     - finalizar_conversacion(): Se dispara cuando el usuario se despide.
+       Limpia la sesión y bloquea el chat.
+
+5. BASE DE DATOS Y AUTENTICACIÓN (Supabase)
+   ─────────────────────────────────────────
+   • Tabla "leads": id (int8), nombre (text), whatsapp (text), 
+     modelo_auto (text), fecha_test_drive (text), created_at (timestamptz).
+   • Auth: Usuario administrador creado manualmente desde el panel de
+     Supabase (Authentication > Users > Add User). No hay signup público.
+   • JWT: Cada sesión de admin genera un access_token que se envía al 
+     backend para autorizar la lectura de leads.
+
+6. AUTOMATIZACIÓN (Make.com — Webhooks)
+   ─────────────────────────────────────
+   • Trigger: Cada vez que la IA captura un lead (4 datos completos),
+     el backend envía un POST al webhook de Make.com con:
+     { "nombre", "whatsapp", "modelo_auto", "fecha_test_drive", "proyecto" }
+   • URL del Webhook: https://hook.us2.make.com/qo8btathlbc1kr3u26qh461cnv956qok
+   • Flujo: Landing → ChatWidget → FastAPI → Groq (Tool Call) → 
+     Supabase (INSERT 4 campos) + Make.com (POST 5 campos) → Gmail / Drive
+   • Protección: La llamada al webhook está envuelta en try/except con 
+     timeout=5s para no bloquear la respuesta al usuario si Make falla.
+
+7. UX DEL CHATWIDGET (Pantalla de Bienvenida)
+   ─────────────────────────────────────────────
+   • Estado Inicial: Al abrir el chat, se muestra una pantalla de bienvenida
+     con el logo de Velocity Motors y el botón "Iniciar Conversación".
+   • No hay auto-start: El micrófono y la IA no se activan hasta que el
+     usuario haga clic en el botón, mejorando la experiencia.
+   • Al iniciar, la IA saluda y pregunta qué modelo le interesa.
+
+================================================================================
+FLUJO COMPLETO DEL SISTEMA (End-to-End)
+================================================================================
+
+1. El usuario entra a la Landing Page y ve el catálogo de vehículos.
+2. Hace clic en el botón de chat (ícono flotante). Ve la pantalla de bienvenida.
+3. Presiona "Iniciar Conversación". La IA saluda y pregunta qué modelo le interesa.
+4. El ChatWidget envía el texto al backend (POST /chat-voz) con su session_id.
+5. FastAPI inyecta la FECHA ACTUAL (datetime) al System Prompt y envía a Groq.
+6. El LLM sigue el flujo guiado: Modelo → Fecha → Nombre → WhatsApp.
+7. Cuando la IA recolecta los 4 datos, ejecuta Tool Calling:
+   a) guardar_lead_test_drive(nombre, whatsapp, modelo_auto, fecha_test_drive)
+   b) Supabase INSERT → Guarda los 4 campos en la tabla leads.
+   c) requests.post() → Envía los 5 campos al Webhook de Make.com.
+   d) Make.com dispara las automatizaciones (email, sheets, etc).
+8. La IA confirma la cita con fecha completa (DD/MM/AAAA) y bloquea el chat.
+9. El administrador accede a /admin, se autentica con Supabase Auth, y ve 
+   el Dashboard con KPIs y la tabla de leads (ahora con modelo y fecha).
+   Puede exportar todo a Excel.
+
+================================================================================
+MAPEO CON MÓDULOS DE TITULACIÓN (Programa 2026)
+================================================================================
+
+Este proyecto cubre los módulos 2, 3 y 4 del Programa de Titulación:
+
+MÓDULO 2 — Generación de Código con IA (Claude como asistente)
+  ✅ CUBIERTO: Toda la Landing Page (HTML/React) fue generada y refinada
+  usando un asistente de IA como co-piloto de desarrollo.
+  Evidencia: Los 7 componentes React del frontend (Navbar, HeroSection, 
+  BrandDNA, Showroom, FinanceCalculator, Footer, ChatWidget) fueron 
+  creados con asistencia de IA, incluyendo diseño responsivo y 
+  animaciones Tailwind.
+
+MÓDULO 3 — Construcción de Agentes Conversacionales
+  ✅ CUBIERTO: Se construyó un agente conversacional avanzado usando 
+  Groq API (Llama 3.3 70B) con:
+  • System Prompt con personalidad, reglas y límites (anti-jailbreak).
+  • Memoria de sesión (historial por session_id).
+  • Base de Conocimientos: Inventario real inyectado en el prompt.
+  • Tool Calling: Funciones estructuradas para captura de leads y 
+    cierre de conversación.
+  Alternativa técnica: En lugar de VoiceFlow, se implementó un agente 
+  personalizado con FastAPI + Groq, logrando mayor control y flexibilidad.
+
+MÓDULO 4 — Sistema Completo con IA + Automatización
+  ✅ CUBIERTO: El ecosistema completo está implementado:
+  • Landing Page generada con IA → velocity-react/
+  • Agente conversacional funcional → backend/main.py
+  • Tool Calls (Function Calling) → guardar_lead_test_drive
+  • API y Webhooks → POST al webhook de Make.com
+  • Automatización con Make.com → Email (Gmail) + Google Drive
+  • Flujo completo: Landing → ChatWidget → FastAPI → Groq → 
+    Supabase → Make.com → Gmail/Drive
+  Panel Admin adicional: Dashboard protegido con autenticación JWT
+  para visualizar y exportar reportes de leads.
+
+================================================================================
+STACK TÉCNICO COMPLETO
+================================================================================
+- FRONTEND: React 19, Vite 8, TailwindCSS 4, React Router DOM, 
+            Supabase JS, Framer Motion, Lucide Icons, XLSX (export).
+- BACKEND:  FastAPI, Python 3.12, Uvicorn, Groq SDK, Supabase Python, 
+            Requests, Pydantic, python-dotenv.
+- IA:       Groq Cloud API → Llama 3.3 70B Versatile.
+- DB/AUTH:  Supabase (PostgreSQL + Auth + JWT).
+- AUTOMACIÓN: Make.com (Webhooks → Gmail, Google Drive, Sheets).
+- TIPOGRAFÍA: Google Fonts (Montserrat, Inter).
+
+================================================================================
+VARIABLES DE ENTORNO REQUERIDAS
+================================================================================
+Backend (.env):
+  GROQ_API_KEY=gsk_...
+  SUPABASE_URL=https://xxx.supabase.co
+  SUPABASE_KEY=eyJhbG...
+
+Frontend (.env):
+  VITE_SUPABASE_URL=https://xxx.supabase.co
+  VITE_SUPABASE_ANON_KEY=eyJhbG...
+
+================================================================================
+CÓMO EJECUTAR EL PROYECTO
+================================================================================
+1. Backend:
+   cd backend
+   pip install -r requirements.txt
+   uvicorn main:app --reload
+
+2. Frontend:
+   cd velocity-react
+   npm install
+   npm run dev
+
+3. Acceder:
+   Landing:   http://localhost:5173
+   Admin:     http://localhost:5173/admin
+   API Docs:  http://localhost:8000/docs
+
+================================================================================
+HISTORIAL DE CAMBIOS (CHANGELOG)
+================================================================================
+
+[28/04/2026] — Sesión 4: Escalado del Agente + UX Mejorada
+  • System Prompt actualizado con flujo guiado: Modelo → Fecha → Nombre → WhatsApp.
+  • Tool Calling ampliado de 2 a 4 campos obligatorios (modelo_auto, fecha_test_drive).
+  • Supabase INSERT y Make.com Webhook actualizados con los 4 campos.
+  • Tabla leads de Supabase: se añadieron columnas modelo_auto y fecha_test_drive.
+  • ChatWidget: se añadió pantalla de bienvenida con botón "Iniciar Conversación".
+  • Eliminado auto-start: el chat ya no habla ni escucha al abrir.
+  • Interpretación inteligente de fechas: "mañana" → DD/MM/AAAA.
+  • Se inyecta la fecha actual (datetime) dinámicamente al System Prompt.
+
+[27/04/2026] — Sesión 3: Webhook Make.com + Automatizaciones
+  • Integración de Make.com: cada lead se envía al webhook externo.
+  • Librería requests instalada y añadida a requirements.txt.
+  • Bloque try/except con timeout=5s para proteger la API principal.
+  • PROJECT_SUMMARY.txt reescrito con arquitectura completa.
+
+[26/04/2026] — Sesión 2: Panel Admin Seguro + Diseño Premium
+  • Login.jsx: formulario glassmorphism, sin registro público (Supabase Auth).
+  • ProtectedRoute.jsx: guardia de ruta con verificación JWT.
+  • Dashboard.jsx: KPIs (Total/Hoy), tabla de leads, exportar a Excel (xlsx).
+  • Endpoint GET /api/leads protegido con HTTPBearer + Supabase get_user().
+  • Paleta de colores unificada: zinc-950 + rojo (#dc2626) en todo el admin.
+  • Fuente Montserrat aplicada al Login y Dashboard.
+
+[25/04/2026] — Sesión 1: Asistente de Voz + Landing Page
+  • Landing Page completa: Navbar, HeroSection, BrandDNA, Showroom,
+    FinanceCalculator, Footer. Diseño "Brutalist Automotive" dark-mode.
+  • ChatWidget con Web Speech API (reconocimiento + síntesis de voz).
+  • Backend FastAPI con Groq API (Llama 3.3 70B) y Tool Calling.
+  • Memoria de sesión por session_id (historial en memoria).
+  • Catálogo de inventario real inyectado en el System Prompt.
+  • Supabase: tabla leads, inserción automática desde Tool Calling.
+  • Herramienta finalizar_conversacion para cierre limpio del chat.
+
+================================================================================
+ESTADO: FUNCIONAL, SEGURO Y AUTOMATIZADO PARA PRODUCCIÓN.
+================================================================================
