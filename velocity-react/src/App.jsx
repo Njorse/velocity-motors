@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import BrandDNA from './components/BrandDNA';
@@ -33,7 +33,7 @@ const LandingPage = () => (
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* Ruta principal pública */}
         <Route path="/" element={<LandingPage />} />
@@ -49,7 +49,7 @@ function App() {
           } 
         />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
