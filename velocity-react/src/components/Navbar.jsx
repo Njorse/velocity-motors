@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronRight } from 'lucide-react';
 
+const scrollTo = (id) => {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+};
+
 const NAV_LINKS = [
   { label: 'Modelos', href: '#modelos' },
   { label: 'Showroom', href: '#showroom' },
@@ -33,39 +37,40 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-16 md:h-20">
 
             {/* Logo */}
-            <a href="#" className="flex items-center gap-3 group" aria-label="Velocity Motors Home">
+            <button onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-3 group" aria-label="Velocity Motors Home">
               <div className="w-8 h-8 bg-red-600 flex items-center justify-center font-black text-white text-sm font-display rotate-45 group-hover:rotate-0 transition-transform duration-500">
                 V
               </div>
               <span className="font-display font-black text-white uppercase tracking-[0.15em] text-sm md:text-base">
                 Velocity <span className="text-red-600">Motors</span>
               </span>
-            </a>
+            </button>
 
             {/* Desktop links */}
             <ul className="hidden lg:flex items-center gap-8">
               {NAV_LINKS.map(link => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-zinc-400 hover:text-white font-display font-semibold uppercase tracking-[0.12em] text-xs transition-colors duration-300 relative group"
+                  <button
+                    onClick={() => scrollTo(link.href.replace('#', ''))}
+                    className="text-zinc-400 hover:text-white font-display font-semibold uppercase tracking-[0.12em] text-xs transition-colors duration-300 relative group bg-transparent border-none cursor-pointer"
+                    style={{ background: 'none' }}
                   >
                     {link.label}
                     <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-red-600 group-hover:w-full transition-all duration-300"></span>
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>
 
             {/* CTA + Hamburger */}
             <div className="flex items-center gap-4">
-              <a
-                href="#contacto"
-                className="hidden lg:flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-display font-bold uppercase tracking-widest text-xs px-6 py-3 transition-all duration-300 group"
+              <button
+                onClick={() => scrollTo('contacto')}
+                className="hidden lg:flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-display font-bold uppercase tracking-widest text-xs px-6 py-3 transition-all duration-300 group border-none cursor-pointer"
               >
                 Test Drive
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </a>
+              </button>
               <button
                 id="mobile-menu-btn"
                 onClick={() => setMobileOpen(o => !o)}
@@ -90,23 +95,24 @@ const Navbar = () => {
               <ul className="flex flex-col py-4 px-4 gap-1">
                 {NAV_LINKS.map(link => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="block py-3 px-4 text-zinc-300 hover:text-white hover:bg-zinc-900 font-display font-bold uppercase tracking-widest text-sm transition-all border-l-2 border-transparent hover:border-red-600"
+                    <button
+                      onClick={() => { scrollTo(link.href.replace('#', '')); setMobileOpen(false); }}
+                      className="block w-full text-left py-3 px-4 text-zinc-300 hover:text-white hover:bg-zinc-900 font-display font-bold uppercase tracking-widest text-sm transition-all border-l-2 border-transparent hover:border-red-600 bg-transparent border-0 cursor-pointer"
+                      style={{ background: 'none', borderLeft: '2px solid transparent' }}
+                      onMouseEnter={e => { e.currentTarget.style.borderLeftColor = '#dc2626'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = '#18181b'; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderLeftColor = 'transparent'; e.currentTarget.style.color = '#d4d4d8'; e.currentTarget.style.background = 'transparent'; }}
                     >
                       {link.label}
-                    </a>
+                    </button>
                   </li>
                 ))}
                 <li className="mt-4">
-                  <a
-                    href="#contacto"
-                    onClick={() => setMobileOpen(false)}
-                    className="block py-4 px-4 bg-red-600 text-white font-display font-bold uppercase tracking-widest text-sm text-center"
+                  <button
+                    onClick={() => { scrollTo('contacto'); setMobileOpen(false); }}
+                    className="block w-full py-4 px-4 bg-red-600 text-white font-display font-bold uppercase tracking-widest text-sm text-center border-none cursor-pointer"
                   >
                     Agendar Test Drive
-                  </a>
+                  </button>
                 </li>
               </ul>
             </motion.div>

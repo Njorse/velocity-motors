@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Zap, ChevronDown } from 'lucide-react';
 
+const scrollTo = (id) => {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+};
+
 const HERO_SLIDES = [
   {
     id: 1,
@@ -107,20 +111,20 @@ const HeroSection = () => {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <a
-              href="#modelos"
-              className="group inline-flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white font-display font-bold uppercase tracking-widest text-sm px-8 py-4 transition-all duration-300 relative overflow-hidden"
+            <button
+              onClick={() => scrollTo('modelos')}
+              className="group inline-flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white font-display font-bold uppercase tracking-widest text-sm px-8 py-4 transition-all duration-300 relative overflow-hidden border-none cursor-pointer"
             >
               <span className="relative z-10">Explorar Catálogo</span>
               <ChevronRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
               <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
-            </a>
-            <a
-              href="#contacto"
-              className="inline-flex items-center justify-center gap-3 bg-transparent border border-zinc-600 hover:border-white hover:bg-white/5 text-white font-display font-bold uppercase tracking-widest text-sm px-8 py-4 transition-all duration-300 backdrop-blur-sm"
+            </button>
+            <button
+              onClick={() => scrollTo('contacto')}
+              className="inline-flex items-center justify-center gap-3 bg-transparent border border-zinc-600 hover:border-white hover:bg-white/5 text-white font-display font-bold uppercase tracking-widest text-sm px-8 py-4 transition-all duration-300 backdrop-blur-sm cursor-pointer"
             >
               Agendar Test Drive
-            </a>
+            </button>
           </div>
         </motion.div>
       </div>
@@ -150,19 +154,19 @@ const HeroSection = () => {
       </div>
 
       {/* Scroll cue */}
-      <motion.a
-        href="#modelos"
+      <motion.button
+        onClick={() => scrollTo('modelos')}
         aria-label="Scroll down"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="absolute bottom-28 right-8 z-20 hidden lg:flex flex-col items-center gap-2 text-zinc-500 hover:text-white transition-colors"
+        className="absolute bottom-28 right-8 z-20 hidden lg:flex flex-col items-center gap-2 text-zinc-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
       >
         <span className="text-[10px] uppercase tracking-[0.2em] font-display font-bold rotate-90 mb-2">Scroll</span>
         <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
           <ChevronDown className="w-5 h-5" />
         </motion.div>
-      </motion.a>
+      </motion.button>
     </section>
   );
 };

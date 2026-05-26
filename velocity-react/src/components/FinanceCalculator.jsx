@@ -2,6 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Calculator, TrendingDown, DollarSign, Calendar } from 'lucide-react';
 
+const scrollTo = (id) => {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+};
+
 const fmt = n => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
 const FinanceCalculator = () => {
@@ -132,13 +136,13 @@ const FinanceCalculator = () => {
 
             {/* CTA */}
             <div className="p-6 pt-0">
-              <a
-                href="#contacto"
+              <button
+                onClick={() => scrollTo('contacto')}
                 id="btn-solicitar-credito"
-                className="block w-full bg-white hover:bg-zinc-100 text-zinc-950 font-display font-black uppercase tracking-widest text-xs py-4 text-center transition-colors duration-300"
+                className="block w-full bg-white hover:bg-zinc-100 text-zinc-950 font-display font-black uppercase tracking-widest text-xs py-4 text-center transition-colors duration-300 border-none cursor-pointer"
               >
                 Solicitar Pre-aprobación
-              </a>
+              </button>
               <p className="text-zinc-600 text-[10px] text-center mt-3 leading-relaxed">
                 *Cálculo referencial. Sujeto a aprobación crediticia. Tasas pueden variar.
               </p>
