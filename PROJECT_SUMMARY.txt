@@ -246,8 +246,8 @@ STACK TÉCNICO COMPLETO
 - FRONTEND: React 19, Vite 8, TailwindCSS 4, React Router DOM, 
             Supabase JS, Framer Motion, Lucide Icons, XLSX (export).
 - BACKEND:  FastAPI, Python 3.12, Uvicorn, Groq SDK, Supabase Python, 
-            Requests, Pydantic, python-dotenv.
-- IA:       Groq Cloud API → Llama 3.3 70B Versatile.
+            Requests, Pydantic, python-dotenv, edge-tts.
+- IA:       Groq (Llama 3.3 70B) + Microsoft Edge TTS (Voz Neural).
 - DB/AUTH:  Supabase (PostgreSQL + Auth + JWT).
 - AUTOMACIÓN: Make.com (Webhooks → Gmail, Google Drive, Sheets).
 - TIPOGRAFÍA: Google Fonts (Montserrat, Inter).
@@ -285,6 +285,15 @@ CÓMO EJECUTAR EL PROYECTO
 ================================================================================
 HISTORIAL DE CAMBIOS (CHANGELOG)
 ================================================================================
+
+[09/05/2026] — Sesión 5: Voz Premium (Edge TTS) + UX Sincronizada
+  • Migración a Microsoft Edge TTS: latencia reducida de 15s a <1s.
+  • Voz Neural "es-MX-JorgeNeural": audio premium sin consumo de CPU/GPU.
+  • Typewriter Effect: el texto del bot aparece letra por letra sincronizado.
+  • Normalización de Texto: conversión automática de $92,000 a "dólares" para voz.
+  • Optimización de Saludo: audio de bienvenida instantáneo con 0 tokens de Groq.
+  • Silence Padding: se añadió silencio inicial para evitar recortes en el habla.
+  • Cleanup: eliminación de dependencias pesadas (Torch/Kokoro) del flujo.
 
 [28/04/2026] — Sesión 4: Escalado del Agente + UX Mejorada
   • System Prompt actualizado con flujo guiado: Modelo → Fecha → Nombre → WhatsApp.

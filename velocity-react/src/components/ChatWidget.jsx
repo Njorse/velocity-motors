@@ -66,8 +66,30 @@ const SendIcon = () => (
   </svg>
 );
 
+/* ─── Typewriter Effect Component ─── */
+const TypewriterText = ({ text, delay = 30 }) => {
+  const [index, setIndex] = useState(0);
+
+  // Reiniciar cuando cambia el texto
+  useEffect(() => {
+    setIndex(0);
+  }, [text]);
+
+  // Avanzar letra por letra
+  useEffect(() => {
+    if (index < text.length) {
+      const timer = setTimeout(() => {
+        setIndex(prev => prev + 1);
+      }, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [index, text, delay]);
+
+  return <>{text.substring(0, index)}</>;
+};
+
 /* ═══════════════════════════════════════════════════════════ */
-const ChatWidget = () => {
+const ChatWidget = ({ hideButton = false }) => {
   const [isOpen, setIsOpen]               = useState(false);
   const [hasStarted, setHasStarted]       = useState(false);
   const [isListening, setIsListening]     = useState(false);
@@ -80,7 +102,7 @@ const ChatWidget = () => {
   const messagesEndRef  = useRef(null);
   const inputRef        = useRef(null);
   const recognitionRef  = useRef(null);
-  const synthRef        = useRef(window.speechSynthesis);
+  const currentAudioRef = useRef(null);
   const sessionIdRef    = useRef(null);
   const hasSpeech       = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 
@@ -97,7 +119,7 @@ const ChatWidget = () => {
     rec.onerror  = () => setIsListening(false);
     rec.onend    = () => setIsListening(false);
     recognitionRef.current = rec;
-    return () => { rec.abort(); synthRef.current?.cancel(); };
+    return () => { rec.abort(); if (currentAudioRef.current) { currentAudioRef.current.pause(); currentAudioRef.current = null; } };
   }, []);
 
   /* ── Auto-scroll ── */
@@ -108,15 +130,24 @@ const ChatWidget = () => {
   /* ── Voz ── */
   const toggleListen = () => {
     if (isListening) { recognitionRef.current?.stop(); }
-    else { synthRef.current.cancel(); recognitionRef.current?.start(); }
+    else {
+      // Detener audio actual si está sonando
+      if (currentAudioRef.current) { currentAudioRef.current.pause(); currentAudioRef.current = null; }
+      recognitionRef.current?.start();
+    }
   };
 
-  const speakText = (text) => {
-    if (!synthRef.current) return;
-    synthRef.current.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'es-ES'; u.rate = 1.0;
-    synthRef.current.speak(u);
+  const playAudioBase64 = (base64Data) => {
+    if (!base64Data) return;
+    try {
+      // Detener audio previo
+      if (currentAudioRef.current) { currentAudioRef.current.pause(); currentAudioRef.current = null; }
+      const audio = new Audio('data:audio/mpeg;base64,' + base64Data);
+      currentAudioRef.current = audio;
+      audio.play().catch(err => console.warn('Audio play error:', err));
+    } catch (err) {
+      console.warn('Error reproduciendo audio Kokoro:', err);
+    }
   };
 
   /* ── Enviar mensaje ── */
@@ -138,7 +169,7 @@ const ChatWidget = () => {
       const data = await res.json();
       if (data.session_id) sessionIdRef.current = data.session_id;
       setMessages(prev => [...prev, { sender: 'bot', text: data.audio_texto }]);
-      speakText(data.audio_texto);
+      playAudioBase64(data.audio_base64);
       // Si el lead fue capturado o la sesión terminó, bloquear el chat
       if (data.lead_captured) {
         setIsLeadCaptured(true);
@@ -188,7 +219,16 @@ const ChatWidget = () => {
     setHasStarted(true);
     const greeting = '¡Hola! Soy tu asesor virtual de Velocity Motors. ¿Qué modelo de auto te interesa? Tenemos Toyota, Hyundai, Kia, BYD y más.';
     setMessages([{ sender: 'bot', text: greeting }]);
-    speakText(greeting);
+    // Generar audio del saludo desde el backend
+    fetch('http://127.0.0.1:8000/chat-voz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mensaje: '__GREETING__', session_id: null }),
+    }).then(r => r.json()).then(data => {
+      if (data.session_id) sessionIdRef.current = data.session_id;
+      setMessages([{ sender: 'bot', text: data.audio_texto }]);
+      playAudioBase64(data.audio_base64);
+    }).catch(() => {});
     setTimeout(() => inputRef.current?.focus(), 200);
   };
 
@@ -202,6 +242,7 @@ const ChatWidget = () => {
       <style>{styles}</style>
 
       {/* ── Botón flotante ── */}
+      {!hideButton && (
       <div className="fixed bottom-6 right-6 z-50" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999 }}>
         {/* Anillo pulsante (solo cuando está cerrado) */}
         {!isOpen && (
@@ -242,8 +283,9 @@ const ChatWidget = () => {
           }}>
             Velocity AI ✦
           </div>
-        )}
+          )}
       </div>
+      )}
 
       {/* ── Ventana del chat ── */}
       {isOpen && (
@@ -427,7 +469,7 @@ const ChatWidget = () => {
                       }
                   ),
                 }}>
-                  {msg.text}
+                  {msg.sender === 'bot' ? <TypewriterText text={msg.text} delay={35} /> : msg.text}
                 </div>
               </div>
             ))}

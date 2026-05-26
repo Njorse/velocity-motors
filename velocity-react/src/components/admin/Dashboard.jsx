@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../config/supabase';
 import * as XLSX from 'xlsx';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const Dashboard = () => {
   const [leads, setLeads] = useState([]);
@@ -57,6 +58,46 @@ const Dashboard = () => {
   const totalLeads = leads.length;
   const leadsHoy = leads.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString()).length;
 
+  // --- Procesamiento de Datos para Gráficas ---
+  // 1. Crecimiento de Leads (Últimos 7 días)
+  const processGrowthData = () => {
+    const data = {};
+    const today = new Date();
+    // Inicializar los últimos 7 días
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateString = d.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+      data[dateString] = 0;
+    }
+    
+    leads.forEach(lead => {
+      const d = new Date(lead.created_at);
+      const dateString = d.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+      if (data[dateString] !== undefined) {
+        data[dateString] += 1;
+      }
+    });
+
+    return Object.keys(data).map(key => ({ date: key, count: data[key] }));
+  };
+
+  // 2. Diversidad de Modelos (Pie Chart)
+  const processModelData = () => {
+    const data = {};
+    leads.forEach(lead => {
+      // Ignorar leads viejos sin modelo si no queremos que salgan "Desconocido"
+      // o mapearlos:
+      const model = lead.modelo_auto || 'Otros';
+      data[model] = (data[model] || 0) + 1;
+    });
+    return Object.keys(data).map(key => ({ name: key, value: data[key] }));
+  };
+
+  const growthData = processGrowthData();
+  const modelData = processModelData();
+  const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899'];
+
   return (
     <div 
       className="min-h-screen bg-zinc-950 text-white p-8"
@@ -91,6 +132,70 @@ const Dashboard = () => {
             <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
             <span className="text-zinc-400 text-xs uppercase tracking-widest font-bold mb-1">Nuevos Hoy</span>
             <span className="text-4xl font-black text-red-500">{leadsHoy}</span>
+          </div>
+        </div>
+
+        {/* --- SECCIÓN DE GRÁFICAS (Analytics) --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Crecimiento LineChart */}
+          <div className="lg:col-span-2 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 shadow-[0_0_15px_-5px_rgba(0,0,0,0.5)]">
+            <h2 className="text-lg font-bold text-zinc-200 mb-6">Crecimiento de Leads (Últimos 7 días)</h2>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={growthData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                  <XAxis dataKey="date" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <RechartsTooltip 
+                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
+                    itemStyle={{ color: '#ef4444' }}
+                  />
+                  <Line type="monotone" dataKey="count" name="Leads" stroke="#ef4444" strokeWidth={3} dot={{ r: 4, fill: '#ef4444', strokeWidth: 0 }} activeDot={{ r: 6, fill: '#ef4444', stroke: '#fff', strokeWidth: 2 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Diversidad PieChart */}
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 shadow-[0_0_15px_-5px_rgba(0,0,0,0.5)] flex flex-col">
+            <h2 className="text-lg font-bold text-zinc-200 mb-2">Preferencia de Modelos</h2>
+            <div className="flex-1 min-h-[200px] flex items-center justify-center">
+              {modelData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={modelData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {modelData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip 
+                      contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-zinc-500 text-sm text-center">No hay datos suficientes</p>
+              )}
+            </div>
+            {/* Leyenda personalizada */}
+            <div className="mt-4 flex flex-wrap gap-3 justify-center">
+              {modelData.map((entry, index) => (
+                <div key={`legend-${index}`} className="flex items-center gap-1.5 text-xs text-zinc-400">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                  <span>{entry.name} ({entry.value})</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

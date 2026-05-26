@@ -1,6 +1,8 @@
 import os
 import json
 import uuid
+import io
+import base64
 import requests
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
@@ -12,6 +14,8 @@ from dotenv import load_dotenv
 from groq import Groq
 from supabase import create_client, Client
 from typing import Optional
+import edge_tts
+import asyncio
 
 # Cargar variables de entorno
 load_dotenv(override=True)
@@ -23,6 +27,37 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY and GROQ_API_KEY != "tu_api_key_de_groq_aqui" else None
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_URL.startswith("http") else None
+
+def normalize_text_for_tts(text: str) -> str:
+    """Limpia el texto para que TTS lo lea bien."""
+    import re
+    text = re.sub(r'\$\s*([\d,\.]+)', r'\1 dólares', text)
+    text = text.replace('*', '').replace('$', ' dólares ')
+    return text
+
+async def generate_audio_base64(text: str) -> str | None:
+    """Genera audio ultra-rápido con Edge TTS y devuelve un string base64 MP3."""
+    if not text:
+        return None
+    try:
+        clean_text = normalize_text_for_tts(text)
+        
+        # Voz "es-MX-JorgeNeural" es una voz masculina premium de México, excelente para ventas.
+        # Alternativas: "es-ES-AlvaroNeural", "es-CO-GonzaloNeural"
+        communicate = edge_tts.Communicate(clean_text, "es-MX-JorgeNeural", rate="+10%")
+        
+        audio_data = b""
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                audio_data += chunk["data"]
+                
+        if not audio_data:
+            return None
+            
+        return base64.b64encode(audio_data).decode('utf-8')
+    except Exception as e:
+        print(f"⚠️ Error generando audio Edge TTS: {e}")
+        return None
 
 app = FastAPI(title="Velocity Motors - Voice Chatbot API")
 
@@ -150,6 +185,20 @@ security = HTTPBearer()
 # ─── ENDPOINT PRINCIPAL ───────────────────────────────────────────────────────
 @app.post("/chat-voz")
 async def chat_voz(request: ChatRequest):
+    # ─── Saludo inicial (no consume Groq) ───
+    if request.mensaje == "__GREETING__":
+        greeting = "¡Hola! Soy tu asesor virtual de Velocity Motors. ¿Qué modelo de auto te interesa? Tenemos Toyota, Hyundai, Kia, BYD y más."
+        session_id = str(uuid.uuid4())
+        sessions[session_id] = [{"role": "assistant", "content": greeting}]
+        audio_b64 = await generate_audio_base64(greeting)
+        return {
+            "audio_texto": greeting,
+            "audio_base64": audio_b64,
+            "session_id": session_id,
+            "lead_captured": False,
+            "session_ended": False
+        }
+
     if not groq_client:
         raise HTTPException(status_code=500, detail="GROQ_API_KEY no configurada.")
 
@@ -222,8 +271,12 @@ async def chat_voz(request: ChatRequest):
         if session_id in sessions:
             sessions[session_id].append({"role": "assistant", "content": audio_texto})
 
+        # Generar audio con Edge TTS
+        audio_b64 = await generate_audio_base64(audio_texto)
+
         return {
             "audio_texto": audio_texto, 
+            "audio_base64": audio_b64,
             "session_id": session_id, 
             "lead_captured": lead_captured,
             "session_ended": session_ended
