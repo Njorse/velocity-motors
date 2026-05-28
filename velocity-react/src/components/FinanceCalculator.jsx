@@ -55,7 +55,7 @@ const FinanceCalculator = () => {
               <div className="w-10 h-[2px] bg-red-600" />
               <span className="text-red-500 font-display font-black uppercase tracking-[0.3em] text-xs">Herramienta Financiera</span>
             </div>
-            <h2 className="font-display font-black uppercase tracking-tighter text-5xl sm:text-6xl text-white leading-none">
+            <h2 className="font-display font-black uppercase tracking-tighter text-4xl sm:text-5xl md:text-6xl text-white leading-none">
               Simula tu<br />
               <span className="text-zinc-600">Financiación</span>
             </h2>
@@ -66,17 +66,17 @@ const FinanceCalculator = () => {
         </div>
 
         {/* Two-col layout */}
-        <div className="grid lg:grid-cols-[1fr_380px] gap-8">
+        <div className="grid lg:grid-cols-[1fr_minmax(320px,380px)] gap-6 sm:gap-8">
 
           {/* Sliders */}
-          <div className="bg-zinc-900/50 border border-zinc-800 p-8 space-y-10">
+          <div className="bg-zinc-900/50 border border-zinc-800 p-5 sm:p-8 space-y-8 sm:space-y-10">
             {sliders.map(s => {
               const Icon = s.icon;
               return (
                 <div key={s.id}>
-                  <div className="flex justify-between items-center mb-4">
-                    <label htmlFor={s.id} className="flex items-center gap-2 text-zinc-400 font-display font-bold uppercase tracking-widest text-xs">
-                      <Icon className="w-4 h-4 text-red-500" /> {s.label}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 mb-3 sm:mb-4">
+                    <label htmlFor={s.id} className="flex items-center gap-2 text-zinc-400 font-display font-bold uppercase tracking-widest text-[10px] sm:text-xs">
+                      <Icon className="w-4 h-4 text-red-500 shrink-0" /> {s.label}
                     </label>
                     <span className="text-white font-display font-black text-sm">{s.display}</span>
                   </div>
@@ -108,9 +108,9 @@ const FinanceCalculator = () => {
             className="bg-zinc-900 border border-zinc-800 flex flex-col"
           >
             {/* Monthly highlight */}
-            <div className="bg-red-600 p-8 flex flex-col items-center justify-center text-center">
+            <div className="bg-red-600 p-6 sm:p-8 flex flex-col items-center justify-center text-center">
               <p className="text-red-200 font-display font-bold uppercase tracking-[0.25em] text-xs mb-2">Cuota Mensual</p>
-              <p className="font-display font-black text-white text-5xl tracking-tighter">{fmt(monthly)}</p>
+              <p className="font-display font-black text-white text-3xl sm:text-5xl tracking-tighter">{fmt(monthly)}</p>
               <p className="text-red-200 text-xs mt-2 font-medium">por {months} meses</p>
             </div>
 
@@ -124,7 +124,7 @@ const FinanceCalculator = () => {
                 { label: 'Total a pagar', value: fmt(totalPay), highlight: true },
               ].map(row => (
                 <div key={row.label} className={`flex justify-between items-center py-3 border-b border-zinc-800 ${row.highlight ? 'border-0 pt-4' : ''}`}>
-                  <span className={`text-xs font-medium uppercase tracking-widest ${row.highlight ? 'text-white font-display font-bold' : 'text-zinc-500'}`}>
+                  <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-widest ${row.highlight ? 'text-white font-display font-bold' : 'text-zinc-500'}`}>
                     {row.label}
                   </span>
                   <span className={`font-display font-black ${row.highlight ? 'text-red-500 text-lg' : 'text-white text-sm'}`}>
