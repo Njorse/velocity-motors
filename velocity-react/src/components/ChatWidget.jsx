@@ -89,7 +89,7 @@ const TypewriterText = ({ text, delay = 30 }) => {
 };
 
 /* ═══════════════════════════════════════════════════════════ */
-const ChatWidget = () => {
+const ChatWidget = ({ hideButton = false }) => {
   const [isOpen, setIsOpen]               = useState(false);
   const [hasStarted, setHasStarted]       = useState(false);
   const [isListening, setIsListening]     = useState(false);
@@ -242,6 +242,7 @@ const ChatWidget = () => {
       <style>{styles}</style>
 
       {/* ── Botón flotante ── */}
+      {!hideButton && (
       <div className="fixed bottom-6 right-6 z-50" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999 }}>
         {/* Anillo pulsante (solo cuando está cerrado) */}
         {!isOpen && (
@@ -284,6 +285,7 @@ const ChatWidget = () => {
           </div>
           )}
       </div>
+      )}
 
       {/* ── Ventana del chat ── */}
       {isOpen && (
