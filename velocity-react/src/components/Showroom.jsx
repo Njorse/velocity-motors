@@ -182,7 +182,7 @@ const VehicleCard = ({ v }) => {
           <span className="text-red-500 text-[10px] font-display font-black uppercase tracking-[0.2em]">{v.brand}</span>
           <span className="text-zinc-500 text-[10px] font-display font-bold uppercase tracking-widest">{v.category}</span>
         </div>
-        <h3 className="font-display font-black text-white uppercase tracking-tighter text-2xl leading-none mb-4 group-hover:text-red-400 transition-colors duration-300">
+        <h3 className="font-display font-black text-white uppercase tracking-tighter text-xl sm:text-2xl leading-tight mb-4 group-hover:text-red-400 transition-colors duration-300 break-words hyphens-auto" lang="en">
           {v.name}
         </h3>
 

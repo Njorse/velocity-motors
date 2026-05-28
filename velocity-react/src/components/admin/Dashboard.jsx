@@ -100,13 +100,13 @@ const Dashboard = () => {
 
   return (
     <div 
-      className="min-h-screen bg-zinc-950 text-white p-8"
+      className="min-h-screen bg-zinc-950 text-white p-4 sm:p-8"
       style={{ fontFamily: "'Montserrat', sans-serif" }}
     >
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8 border-b border-zinc-800 pb-6">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8 border-b border-zinc-800 pb-6">
           <div>
-            <h1 className="text-3xl font-black uppercase tracking-tighter">Reporte de Sistema - <span className="text-red-500">Leads</span></h1>
+            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter">Reporte de Sistema - <span className="text-red-500">Leads</span></h1>
             <p className="text-zinc-500 text-sm mt-1">Gestión administrativa de Velocity Motors</p>
           </div>
           <button 
@@ -138,13 +138,13 @@ const Dashboard = () => {
         {/* --- SECCIÓN DE GRÁFICAS (Analytics) --- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Crecimiento LineChart */}
-          <div className="lg:col-span-2 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 shadow-[0_0_15px_-5px_rgba(0,0,0,0.5)]">
-            <h2 className="text-lg font-bold text-zinc-200 mb-6">Crecimiento de Leads (Últimos 7 días)</h2>
+           <div className="lg:col-span-2 bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-[0_0_15px_-5px_rgba(0,0,0,0.5)]">
+            <h2 className="text-base sm:text-lg font-bold text-zinc-200 mb-4 sm:mb-6">Crecimiento de Leads (Últimos 7 días)</h2>
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={growthData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                  <XAxis dataKey="date" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="date" stroke="#a1a1aa" fontSize={10} tickLine={false} axisLine={false} interval={0} angle={-35} textAnchor="end" height={50} />
                   <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
                   <RechartsTooltip 
                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
@@ -157,8 +157,8 @@ const Dashboard = () => {
           </div>
 
           {/* Diversidad PieChart */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 shadow-[0_0_15px_-5px_rgba(0,0,0,0.5)] flex flex-col">
-            <h2 className="text-lg font-bold text-zinc-200 mb-2">Preferencia de Modelos</h2>
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-[0_0_15px_-5px_rgba(0,0,0,0.5)] flex flex-col">
+            <h2 className="text-base sm:text-lg font-bold text-zinc-200 mb-2">Preferencia de Modelos</h2>
             <div className="flex-1 min-h-[200px] flex items-center justify-center">
               {modelData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -199,7 +199,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="flex justify-between items-end mb-4">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-3 mb-4">
           <h2 className="text-lg font-bold text-zinc-200">Listado Reciente</h2>
           <button 
             onClick={exportToExcel}

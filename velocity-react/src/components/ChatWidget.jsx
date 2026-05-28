@@ -290,8 +290,8 @@ const ChatWidget = () => {
         <div
           className="chat-window"
           style={{
-            position: 'fixed', bottom: '96px', right: '24px',
-            width: '380px', height: '540px', zIndex: 9998,
+            position: 'fixed', bottom: '16px', right: '16px',
+            width: 'calc(100vw - 32px)', maxWidth: '380px', height: 'min(540px, 70vh)', zIndex: 9998,
             display: 'flex', flexDirection: 'column',
             borderRadius: '20px', overflow: 'hidden',
             background: 'linear-gradient(160deg, #131316 0%, #0d0d10 100%)',

@@ -34,7 +34,7 @@ const Login = () => {
     >
       <div className="bg-zinc-900/40 backdrop-blur-xl p-8 rounded-2xl border border-red-500/20 shadow-[0_0_40px_-15px_rgba(239,68,68,0.3)] w-full max-w-md">
         <div className="mb-8 text-center">
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Acceso Administrativo</h2>
+          <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter">Acceso Administrativo</h2>
           <p className="text-red-500 font-bold uppercase tracking-widest text-sm mt-2">Velocity Motors</p>
         </div>
 

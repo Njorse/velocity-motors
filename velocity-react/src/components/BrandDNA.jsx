@@ -45,7 +45,7 @@ const BrandDNA = () => (
             Es una declaración de quién eres, de lo que exiges de la vida. Cada línea,
             cada cilindro, cada decisión de ingeniería es un acto de rebeldía contra lo mediocre.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-6 sm:gap-6">
             <div className="flex flex-col">
               <span className="font-display font-black text-4xl text-red-600">12+</span>
               <span className="text-zinc-500 text-xs uppercase tracking-widest">Años en el mercado</span>

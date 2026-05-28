@@ -90,7 +90,7 @@ const HeroSection = () => {
           </div>
 
           {/* Title */}
-          <h1 className="font-display font-black uppercase tracking-tighter text-white leading-[0.85] text-7xl sm:text-8xl lg:text-[9rem] mb-4">
+          <h1 className="font-display font-black uppercase tracking-tighter text-white leading-[0.85] text-6xl sm:text-8xl lg:text-[9rem] mb-4">
             {slide.title}
           </h1>
 
@@ -113,7 +113,7 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={() => scrollTo('modelos')}
-              className="group inline-flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white font-display font-bold uppercase tracking-widest text-sm px-8 py-4 transition-all duration-300 relative overflow-hidden border-none cursor-pointer"
+              className="w-full sm:w-auto group inline-flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white font-display font-bold uppercase tracking-widest text-sm px-8 py-4 transition-all duration-300 relative overflow-hidden border-none cursor-pointer"
             >
               <span className="relative z-10">Explorar Catálogo</span>
               <ChevronRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
@@ -121,7 +121,7 @@ const HeroSection = () => {
             </button>
             <button
               onClick={() => scrollTo('contacto')}
-              className="inline-flex items-center justify-center gap-3 bg-transparent border border-zinc-600 hover:border-white hover:bg-white/5 text-white font-display font-bold uppercase tracking-widest text-sm px-8 py-4 transition-all duration-300 backdrop-blur-sm cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-transparent border border-zinc-600 hover:border-white hover:bg-white/5 text-white font-display font-bold uppercase tracking-widest text-sm px-8 py-4 transition-all duration-300 backdrop-blur-sm cursor-pointer"
             >
               Agendar Test Drive
             </button>
