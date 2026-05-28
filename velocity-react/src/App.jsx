@@ -7,7 +7,6 @@ import Showroom from './components/Showroom';
 import FinanceCalculator from './components/FinanceCalculator';
 import Footer from './components/Footer';
 import ChatWidget from './components/ChatWidget';
-import WhatsAppButton from './components/WhatsAppButton';
 
 // Rutas de Administración
 import Login from './components/admin/Login';
@@ -26,8 +25,7 @@ const LandingPage = () => (
       <FinanceCalculator />
     </main>
     <Footer />
-    <ChatWidget hideButton />
-    <WhatsAppButton />
+    <ChatWidget />
   </div>
 );
 
